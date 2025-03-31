@@ -10,8 +10,7 @@ data_app = Blueprint('data', __name__)
 
 @data_app.route('/daily/task', methods=['POST'])
 def AddDailyWork(request=request, model=NewDailyWorkModel, db: Session = DatabaseConnection.get_db_connection()):
-    addDailyWork_data = model(**request.get_json())
-    payload = addDailyWork_data.dict()
+    payload = model(**request.get_json()).dict()
     queryParams = (request.args).to_dict()
     headers = dict(request.headers)
     error, data = DataService(db, headers, payload, queryParams).addDailyWork()
@@ -33,8 +32,7 @@ def GetColumnData(columnName, request=request,  db: Session = DatabaseConnection
 
 @data_app.route('/daily/task', methods=['GET'])
 def GetDailyWork(request=request, model=GetDailyWorkModel, db: Session = DatabaseConnection.get_db_connection()):
-    getDailyWork_data = model(**request.args.to_dict())
-    queryParams = getDailyWork_data.dict()
+    queryParams = model(**request.args.to_dict()).dict()
     headers = dict(request.headers)
     error, data = DataService(db, headers, {}, queryParams).getDailyWork()
     if error:
@@ -45,8 +43,7 @@ def GetDailyWork(request=request, model=GetDailyWorkModel, db: Session = Databas
 
 @data_app.route('/daily/task/<int:workId>', methods=['PUT'])
 def UpdateDailyWork(workId, request=request, model=UpdateDailyWorkModel, db: Session = DatabaseConnection.get_db_connection()):
-    updateDailyWork_data = model(**request.get_json())
-    payload = updateDailyWork_data.dict()
+    payload = model(**request.get_json()).dict()
     queryParams = (request.args).to_dict()
     headers = dict(request.headers)
     # pathParams = request.view_args
