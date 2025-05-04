@@ -1,9 +1,10 @@
 from pytz import timezone
-from sqlalchemy import Column, Date, ForeignKey, Index, Integer, Boolean, DateTime, func
+from sqlalchemy import TEXT, Column, Date, ForeignKey, Index, Integer, Boolean, DateTime, Enum, func
 from sqlalchemy.sql.sqltypes import VARCHAR
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.configs.database import Base
+from app.models.enums import CommunicationstatusEnum
 
 class User(Base):
     __tablename__ = 'user'
@@ -12,13 +13,14 @@ class User(Base):
     fullName = Column(VARCHAR(50), nullable=False)
     userName = Column(VARCHAR(50), unique=True)
     userSecret = Column(VARCHAR(150), nullable=False)
-    mobileNumber = Column(VARCHAR(1000), nullable=False)
+    mobileNumber = Column(VARCHAR(10), nullable=False)
     premiumMember = Column(Boolean, default=True)
     is_active = Column(Boolean, default=True)
     createdDate = Column(DateTime, default=datetime.now(timezone("Asia/Kolkata")).isoformat)
     modifiedDate = Column(DateTime, nullable=True)
     
     dailywork = relationship("DailyWork", back_populates="user")
+    communicationtransaction = relationship("communicationTransaction", back_populates="user")
     
 
 class DailyWork(Base):
@@ -41,4 +43,24 @@ class DailyWork(Base):
         Index("idx_team", team),
         Index("idx_sprint", sprint),
         Index("idx_workDate", workDate),
+    )
+    
+
+class CommunicationTransaction(Base):
+    __tablename__ = "communicationTransaction"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    userId = Column(Integer, ForeignKey("user.userId", onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+    transactionId = Column(VARCHAR(256), nullable=True)
+    trackingId = Column(VARCHAR(256), nullable=False)
+    sendTime = Column(DateTime, nullable=True, default=datetime.now(timezone("Asia/Kolkata")).isoformat)
+    validateTime = Column(DateTime, nullable=True, default=datetime.now(timezone("Asia/Kolkata")).isoformat)
+    status = Column(Enum(CommunicationstatusEnum))
+    statusDescription = Column(TEXT, nullable=False)
+    otpHash = Column(VARCHAR(256), nullable=True)
+    
+    user = relationship("User", back_populates="communicationtransaction")
+    
+    __table_args__ = (
+        Index("userIdandtransactionId", userId, transactionId),
     )

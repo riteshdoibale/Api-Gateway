@@ -6,11 +6,12 @@ from app.utils.db_helper_functions import to_dict
 
 class DataService:
     
-    def __init__(self, dbCon, headers, payload={}, queryParams={}):
+    def __init__(self, trackingId, dbCon, headers, payload=None, queryParams=None):
+        self.trackingId = trackingId
         self.dbCon = dbCon
         self.headers = headers
-        self.payload = payload
-        self.queryParams = queryParams
+        self.payload = payload if payload else {} 
+        self.queryParams = queryParams if queryParams else {} 
     
     def addDailyWork(self):
         errors = []
@@ -40,8 +41,8 @@ class DataService:
         userDetail = self.dbCon.execute(select(User).where(User.userName == self.headers.get('Username'), User.is_active == 1))
         userDetail = [to_dict(user) for user in userDetail.first()]
         userDetail = userDetail[0]
-        results = self.dbCon.execute(select(distinct(column)).where(DailyWork.userId == userDetail['userId'])).scalars().all()
-        return errors, {'messege' : results}
+        response = self.dbCon.execute(select(distinct(column)).where(DailyWork.userId == userDetail['userId'])).scalars().all()
+        return errors, response
     
     def getDailyWork(self):
         errors = []
@@ -78,7 +79,7 @@ class DataService:
             "pageSize" : self.queryParams.get('pageSize'),
             "data" : workDetail
         }
-        return errors, {'messege' : response}
+        return errors, response
     
     def updateDailyWork(self, workId):
         errors = []
