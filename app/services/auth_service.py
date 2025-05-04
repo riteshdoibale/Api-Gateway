@@ -9,7 +9,8 @@ from app.utils.hashing_service import HashingService
 
 
 class AuthService:
-    def __init__(self, dbCon, payload):
+    def __init__(self, trackingId, dbCon, payload):
+        self.trackingId = trackingId
         self.dbCon = dbCon
         self.payload = payload
         
@@ -60,7 +61,7 @@ class AuthService:
         del userDetail[0]['userSecret']
         self.dbCon.execute(update(User).where(User.userName == self.payload.get('userName')).values(**userDetail[0]))
         self.dbCon.commit()
-        return errors, {'messege': f"{userDetail[0]}"}
+        return errors, userDetail[0]
     
     def storeNewPass(self):
         errors = []

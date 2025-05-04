@@ -5,3 +5,7 @@ db_password = "root"
 db_url = "127.0.0.1"
 db_port = 3306
 db_name = "apigatewaydb"
+email_host = "smtp.gmail.com"
+email_port = 587
+email_admin = ""
+email_pass = ""
