@@ -9,7 +9,7 @@ from app.models.enums import CommunicationstatusEnum
 class User(Base):
     __tablename__ = 'user'
     
-    userId = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     fullName = Column(VARCHAR(50), nullable=False)
     userName = Column(VARCHAR(50), unique=True)
     userSecret = Column(VARCHAR(150), nullable=False)
@@ -21,13 +21,14 @@ class User(Base):
     
     dailywork = relationship("DailyWork", back_populates="user")
     communicationtransaction = relationship("communicationTransaction", back_populates="user")
+    audit = relationship("Audit", back_populates="user")
     
 
 class DailyWork(Base):
     __tablename__ = "dailywork"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    userId = Column(Integer, ForeignKey("user.userId", onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+    userId = Column(Integer, ForeignKey("user.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
     company = Column(VARCHAR(256), nullable=False)
     team = Column(VARCHAR(256), nullable=True)
     sprint = Column(VARCHAR(256), nullable=True)
@@ -43,6 +44,7 @@ class DailyWork(Base):
         Index("idx_team", team),
         Index("idx_sprint", sprint),
         Index("idx_workDate", workDate),
+        Index('userIddailywork', userId),
     )
     
 
@@ -50,7 +52,7 @@ class CommunicationTransaction(Base):
     __tablename__ = "communicationTransaction"
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    userId = Column(Integer, ForeignKey("user.userId", onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+    userId = Column(Integer, ForeignKey("user.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
     transactionId = Column(VARCHAR(256), nullable=True)
     trackingId = Column(VARCHAR(256), nullable=False)
     sendTime = Column(DateTime, nullable=True, default=datetime.now(timezone("Asia/Kolkata")).isoformat)
@@ -63,4 +65,22 @@ class CommunicationTransaction(Base):
     
     __table_args__ = (
         Index("userIdandtransactionId", userId, transactionId),
+        Index('userIdCommunication', userId),
+    )
+    
+    
+class Audit(Base):
+    __tablename__ = 'audits'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    userId = Column(Integer, ForeignKey('user.id', onupdate="NO ACTION", ondelete="NO ACTION"), nullable=False)
+    trackingId = Column(VARCHAR(256), nullable=False)
+    previousData = Column(VARCHAR(5000), nullable=False)
+    modifiedData = Column(VARCHAR(5000), nullable=False)
+    modifiedDate = Column(DateTime, default=func.now(), nullable=True)
+
+    user = relationship("User", back_populates="audit")
+    
+    __table_args__ = (
+        Index('userIdaudits', userId),
     )

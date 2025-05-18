@@ -83,7 +83,7 @@ class CommunicationService:
             self.dbCon.commit()
             self.dbCon.refresh(transactionResponse)
         except Exception as e:
-            print("Exception in createTransation : ", e)
+            print(f"{self.trackingId} Exception in createTransation : ", e)
             
     def fetchTransaction(self, transactionId, userId):
         transactionData = self.dbCon.execute(select(CommunicationTransaction).where(CommunicationTransaction.transactionId == transactionId, CommunicationTransaction.userId == userId))
