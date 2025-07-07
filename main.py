@@ -1,4 +1,6 @@
-from flask import Flask
+import uuid
+from flask import Flask, jsonify
+from pydantic import ValidationError
 from app.configs.database import DatabaseConnection
 from app.utils.middleware import Middleware
 DatabaseConnection.establish_db_connection()
@@ -10,6 +12,15 @@ Base.metadata.create_all(engine)
 app = Flask(__name__)
 app.wsgi_app = Middleware(app.wsgi_app)
 
+
+@app.errorhandler(ValidationError)
+def handle_pydantic_error(e):
+    response = {
+        'trackingId': str(uuid.uuid4()),
+        'errors': e.errors(),
+        'data': {}
+    }
+    return jsonify(response), 400
 
 from app.controllers.auth_controller import auth_app
 from app.controllers.data_controller import data_app
